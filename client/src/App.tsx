@@ -1,18 +1,35 @@
-import { useState } from 'react';
-import { WilayahDropdown, type WilayahSelection } from './components/WilayahDropdown';
+import { NavLink, Route, Routes } from 'react-router-dom';
+import { AddressPage } from './pages/AddressPage';
+import { AdminPage } from './pages/AdminPage';
 
 function App() {
-  const [selection, setSelection] = useState<WilayahSelection | null>(null);
-
   return (
-    <div className="mx-auto max-w-2xl p-6">
-      <h1 className="mb-4 text-xl font-semibold text-gray-900">Alamat</h1>
-      <WilayahDropdown onChange={setSelection} />
-      {selection && (
-        <pre className="mt-6 rounded-md bg-gray-50 p-4 text-xs text-gray-700">
-          {JSON.stringify(selection, null, 2)}
-        </pre>
-      )}
+    <div>
+      <nav className="border-b border-gray-200 bg-white">
+        <div className="mx-auto flex max-w-2xl gap-4 p-4">
+          <NavLink
+            to="/"
+            end
+            className={({ isActive }) =>
+              `text-sm font-medium ${isActive ? 'text-blue-600' : 'text-gray-600'}`
+            }
+          >
+            Alamat
+          </NavLink>
+          <NavLink
+            to="/admin"
+            className={({ isActive }) =>
+              `text-sm font-medium ${isActive ? 'text-blue-600' : 'text-gray-600'}`
+            }
+          >
+            Admin Wilayah
+          </NavLink>
+        </div>
+      </nav>
+      <Routes>
+        <Route path="/" element={<AddressPage />} />
+        <Route path="/admin" element={<AdminPage />} />
+      </Routes>
     </div>
   );
 }
