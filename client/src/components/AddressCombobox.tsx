@@ -9,6 +9,7 @@ interface AddressComboboxProps {
   value: WilayahItem | null;
   onChange: (item: WilayahItem | null) => void;
   onAutoFillAncestors?: (path: WilayahItem[]) => void;
+  refreshToken?: number;
 }
 
 export function AddressCombobox({
@@ -18,6 +19,7 @@ export function AddressCombobox({
   value,
   onChange,
   onAutoFillAncestors,
+  refreshToken = 0,
 }: AddressComboboxProps) {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
@@ -74,7 +76,7 @@ export function AddressCombobox({
     debounceRef.current = window.setTimeout(() => fetchOptions(query), 300);
     return () => window.clearTimeout(debounceRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, open]);
+  }, [query, open, refreshToken]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
