@@ -3,20 +3,46 @@
 API ini menyediakan data wilayah administratif Indonesia (provinsi,
 kabupaten/kota, kecamatan, desa/kelurahan) berjenjang, dengan endpoint
 baca (publik) dan endpoint kelola data (butuh API key). Dokumen ini untuk
-developer yang mengonsumsi API ini dari aplikasi lain (Node.js, PHP,
-bahasa apa pun yang bisa melakukan HTTP request).
+developer **atau AI coding assistant** yang mengintegrasikan aplikasi lain
+(Node.js, PHP, bahasa apa pun yang bisa melakukan HTTP request) dengan API
+ini — dokumen ini dibuat agar bisa dibaca dan langsung dieksekusi tanpa
+konteks tambahan.
+
+## Ringkasan Cepat
+
+Untuk kasus paling umum — **dropdown/combobox alamat bertingkat** (pilih
+provinsi → kabupaten/kota → kecamatan → desa) di aplikasi lain — cukup 2
+endpoint baca, **tidak perlu API key sama sekali**:
+
+1. `GET /api/wilayah?parent=<kode>` — isi pilihan tiap level (children dari kode yang dipilih di level atasnya; tanpa `parent` = semua provinsi).
+2. `GET /api/wilayah/search?level=<1-4>&q=<teks>` — untuk pencarian/typeahead per level, hasilnya sudah termasuk `path` (breadcrumb) untuk auto-isi level di atasnya kalau user langsung pilih dari hasil pencarian.
+
+Lihat bagian **"Pola Integrasi Dropdown Bertingkat"** di bawah untuk alur
+lengkapnya. Endpoint `POST`/`PATCH`/`DELETE` (butuh `X-API-Key`) hanya
+relevan kalau aplikasi lain juga perlu mengelola (tambah/ubah/hapus) data
+wilayah, bukan sekadar menampilkan dropdown.
+
+**Sebelum mulai:** pastikan tahu (1) base URL server ini yang bisa dijangkau
+aplikasi lain — **jangan asumsikan `localhost:3001`** kalau kedua aplikasi
+tidak berjalan di mesin/jaringan yang sama, tanyakan ke user kalau tidak
+yakin — dan (2) apakah butuh API key (hanya untuk endpoint mutasi).
 
 ## Base URL
 
-Jalankan server dari root project:
+Jalankan server dari root project ini:
 
 ```bash
 npm run build
 npm run start
 ```
 
-Server berjalan di `http://localhost:3001` (atau host/port sesuai deployment
-Anda). Semua path di bawah relatif terhadap base URL ini.
+Default `http://localhost:3001` saat dijalankan lokal. **Ganti sesuai
+alamat aktual server ini bisa diakses** dari aplikasi yang mengintegrasikan
+(mis. `http://192.168.x.x:3001`, domain internal, dst — tanyakan ke user
+jika tidak diberi tahu). Semua path di bawah relatif terhadap base URL ini.
+
+CORS diizinkan untuk semua origin, jadi endpoint `GET` bisa dipanggil
+langsung dari browser (frontend JS) tanpa proxy tambahan.
 
 ## Autentikasi
 
@@ -43,6 +69,36 @@ Kode berjenjang, dipisah titik, level ditentukan dari jumlah titik:
 
 `kode` bersifat permanen setelah dibuat (primary key) — endpoint update
 hanya bisa mengubah `nama`.
+
+## Pola Integrasi Dropdown Bertingkat
+
+Alur standar untuk membangun 4 dropdown/combobox alamat (Provinsi →
+Kabupaten/Kota → Kecamatan → Desa) di aplikasi lain:
+
+1. **Saat mount / dropdown Provinsi dibuka:** panggil `GET /api/wilayah`
+   (tanpa `parent`) untuk isi daftar provinsi.
+2. **User pilih Provinsi:** simpan kode-nya, panggil
+   `GET /api/wilayah?parent=<kode_provinsi>` untuk isi daftar Kabupaten/Kota.
+   Reset pilihan Kecamatan & Desa yang mungkin sudah terisi sebelumnya.
+3. **User pilih Kabupaten/Kota:** sama, `parent=<kode_kabupaten>` untuk isi
+   Kecamatan, reset Desa.
+4. **User pilih Kecamatan:** `parent=<kode_kecamatan>` untuk isi Desa.
+5. **(Opsional) Search-as-you-type:** kalau dropdown butuh fitur cari nama
+   (terutama penting untuk Kecamatan/Desa yang jumlahnya sangat banyak),
+   panggil `GET /api/wilayah/search?level=<1-4>&q=<ketikan_user>` alih-alih
+   endpoint `parent=` di atas saat user mengetik. Setiap hasil punya
+   field `path` (array `{kode, nama}` dari provinsi turun ke induk
+   langsungnya) — pakai ini untuk auto-isi dropdown level di atasnya kalau
+   user langsung memilih hasil pencarian tanpa memilih level di atasnya
+   dulu (mis. langsung cari & pilih nama desa).
+6. **Submit form:** kirim `kode` level terdalam yang dipilih (biasanya
+   kode desa) — kode ini sudah unik dan cukup untuk merepresentasikan
+   alamat lengkap karena mengandung seluruh hierarki di atasnya (lihat
+   "Format Kode Wilayah" di atas). Simpan `nama` di masing-masing level
+   juga kalau aplikasi perlu menampilkan ulang alamat tanpa query API lagi.
+
+Tidak perlu `X-API-Key` untuk seluruh alur ini — hanya endpoint baca yang
+dipakai.
 
 ## Daftar Endpoint
 
@@ -300,3 +356,13 @@ function deleteWilayah(string $kode): void {
     }
 }
 ```
+
+## Checklist Integrasi
+
+Untuk AI/developer yang mengadaptasi aplikasi lain agar pakai API ini:
+
+1. Konfirmasi base URL server ini (bukan `localhost:3001` kecuali memang satu mesin) — simpan sebagai env var di aplikasi yang mengintegrasikan (mis. `WILAYAH_API_BASE_URL`), jangan hardcode.
+2. Kalau cuma butuh dropdown/tampilan alamat (kasus paling umum): implementasikan fetch wrapper untuk `GET /api/wilayah` dan `GET /api/wilayah/search` saja, ikuti "Pola Integrasi Dropdown Bertingkat" di atas. Tidak perlu API key.
+3. Kalau juga butuh kelola data wilayah (tambah/ubah/hapus): minta `API_KEY` dari `.env` project ini ke user, simpan sebagai secret/env var di aplikasi lain (jangan pernah expose ke frontend/browser — panggil endpoint mutasi dari backend, bukan langsung dari client-side JS).
+4. Tangani response non-2xx secara seragam: body selalu `{"error": "<pesan>"}` pada kegagalan, tampilkan/log pesan ini apa adanya (sudah dalam Bahasa Indonesia, siap ditampilkan ke user).
+5. Uji alur lengkap dengan data asli sebelum menganggap selesai (mis. pilih provinsi nyata → pastikan kabupaten/kecamatan/desa ter-load benar).
