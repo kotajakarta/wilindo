@@ -38,6 +38,19 @@ export function AddressPage() {
           </p>
         </div>
       )}
+
+      <p className="mt-6 text-xs text-faint">
+        Sumber data:{' '}
+        <a
+          href="https://sig.bps.go.id/bridging-kode/index"
+          target="_blank"
+          rel="noreferrer"
+          className="text-brand underline decoration-brand/30 hover:decoration-brand"
+        >
+          sig.bps.go.id/bridging-kode
+        </a>{' '}
+        — Badan Pusat Statistik, Tahun 2025 Semester 2.
+      </p>
     </div>
   );
 }
