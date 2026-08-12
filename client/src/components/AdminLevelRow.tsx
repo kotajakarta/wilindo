@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AddressCombobox } from './AddressCombobox';
 import type { WilayahItem, WilayahLevel } from '../types/wilayah';
+import { getChildren } from '../api/wilayah';
 import { createWilayah, updateWilayahNama, deleteWilayah } from '../api/wilayahAdmin';
 
 interface AdminLevelRowProps {
@@ -14,8 +15,27 @@ interface AdminLevelRowProps {
   onMutated: () => void;
 }
 
+function segmentWidth(level: WilayahLevel): number {
+  return level === 4 ? 4 : 2;
+}
+
 function segmentPlaceholder(level: WilayahLevel): string {
   return level === 4 ? '4 digit (mis. 2001)' : '2 digit (mis. 01)';
+}
+
+async function suggestNextSegment(parentKode: string | undefined, level: WilayahLevel): Promise<string> {
+  const width = segmentWidth(level);
+  try {
+    const siblings = await getChildren(parentKode);
+    const maxNumber = siblings.reduce((max, item) => {
+      const lastSegment = item.kode.split('.').pop() ?? '';
+      const num = parseInt(lastSegment, 10);
+      return Number.isFinite(num) && num > max ? num : max;
+    }, 0);
+    return String(maxNumber + 1).padStart(width, '0');
+  } catch {
+    return ''; // fetch failed; let the admin type the segment manually
+  }
 }
 
 export function AdminLevelRow({
@@ -67,6 +87,12 @@ export function AdminLevelRow({
     } finally {
       setBusy(false);
     }
+  }
+
+  async function handleOpenAdd() {
+    setMode('adding');
+    setNewNama('');
+    setNewSegment(await suggestNextSegment(parentKode, level));
   }
 
   async function handleCreate() {
@@ -151,7 +177,7 @@ export function AdminLevelRow({
             <button
               type="button"
               className="text-sm text-green-700 underline"
-              onClick={() => setMode('adding')}
+              onClick={handleOpenAdd}
             >
               + Tambah {label}
             </button>
