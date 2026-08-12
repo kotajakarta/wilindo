@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { NavLink, Route, Routes } from 'react-router-dom';
 import { AddressPage } from './pages/AddressPage';
 import { AdminPage } from './pages/AdminPage';
+import { ApiDocsPage } from './pages/ApiDocsPage';
 import { useApiHealth } from './hooks/useApiHealth';
 
 function HierarchyMark() {
@@ -86,6 +87,7 @@ function App() {
               Alamat
             </NavTab>
             <NavTab to="/admin">Admin CRUD</NavTab>
+            <NavTab to="/instruksi-api">Instruksi API</NavTab>
           </nav>
         </div>
       </header>
@@ -93,6 +95,7 @@ function App() {
         <Routes>
           <Route path="/" element={<AddressPage />} />
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/instruksi-api" element={<ApiDocsPage />} />
         </Routes>
       </main>
     </div>
