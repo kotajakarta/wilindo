@@ -15,6 +15,15 @@ interface AdminLevelRowProps {
   onMutated: () => void;
 }
 
+const btnGhost =
+  'rounded-md border border-hairline px-2.5 py-1 text-xs font-medium text-ink hover:bg-canvas disabled:opacity-50';
+const btnDanger =
+  'rounded-md border border-hairline px-2.5 py-1 text-xs font-medium text-danger hover:border-danger/40 hover:bg-danger-tint disabled:opacity-50';
+const btnPrimary =
+  'rounded-md bg-brand px-2.5 py-1 text-xs font-medium text-white hover:bg-brand-dark disabled:opacity-50';
+const fieldSm =
+  'rounded-md border border-hairline bg-surface px-2 py-1 text-sm text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand';
+
 function segmentWidth(level: WilayahLevel): number {
   return level === 4 ? 4 : 2;
 }
@@ -114,7 +123,7 @@ export function AdminLevelRow({
   }
 
   return (
-    <div className="border-b border-gray-100 pb-4">
+    <div className="border-b border-hairline pt-5 pb-5 first:pt-0 last:border-0 last:pb-0">
       <AddressCombobox
         label={label}
         level={level}
@@ -128,44 +137,47 @@ export function AdminLevelRow({
       />
 
       {selected && mode === 'idle' && (
-        <div className="mt-2 flex gap-2">
-          <button
-            type="button"
-            className="text-sm text-blue-600 underline"
-            onClick={() => {
-              setPendingNama(selected.nama);
-              setMode('editing');
-            }}
-          >
-            Ubah Nama
-          </button>
-          <button type="button" className="text-sm text-red-600 underline" onClick={handleDelete}>
-            Hapus
-          </button>
+        <div className="mt-2 flex items-center justify-between gap-3 rounded-lg border border-hairline bg-canvas px-3 py-2">
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="shrink-0 rounded bg-brand-tint px-1.5 py-0.5 font-mono text-[11px] font-medium text-brand">
+              {selected.kode}
+            </span>
+            <span className="truncate text-sm font-medium text-ink">{selected.nama}</span>
+          </div>
+          <div className="flex shrink-0 gap-2">
+            <button
+              type="button"
+              className={btnGhost}
+              onClick={() => {
+                setPendingNama(selected.nama);
+                setMode('editing');
+              }}
+            >
+              Ubah
+            </button>
+            <button type="button" className={btnDanger} onClick={handleDelete}>
+              Hapus
+            </button>
+          </div>
         </div>
       )}
 
       {selected && mode === 'editing' && (
-        <div className="mt-2 flex items-center gap-2">
+        <div className="mt-2 flex flex-wrap items-center gap-2 rounded-lg border border-hairline bg-canvas px-3 py-2">
+          <span className="shrink-0 rounded bg-brand-tint px-1.5 py-0.5 font-mono text-[11px] font-medium text-brand">
+            {selected.kode}
+          </span>
           <input
             type="text"
-            className="rounded-md border border-gray-300 px-2 py-1 text-sm"
+            className={`${fieldSm} flex-1`}
             value={pendingNama}
             onChange={(e) => setPendingNama(e.target.value)}
+            autoFocus
           />
-          <button
-            type="button"
-            className="text-sm text-blue-600 underline disabled:opacity-50"
-            disabled={busy}
-            onClick={handleSaveEdit}
-          >
+          <button type="button" className={btnPrimary} disabled={busy} onClick={handleSaveEdit}>
             Simpan
           </button>
-          <button
-            type="button"
-            className="text-sm text-gray-500 underline"
-            onClick={() => setMode('idle')}
-          >
+          <button type="button" className={btnGhost} onClick={() => setMode('idle')}>
             Batal
           </button>
         </div>
@@ -176,41 +188,34 @@ export function AdminLevelRow({
           {mode !== 'adding' ? (
             <button
               type="button"
-              className="text-sm text-green-700 underline"
+              className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-hairline py-2 text-xs font-medium text-muted hover:border-brand hover:text-brand"
               onClick={handleOpenAdd}
             >
               + Tambah {label}
             </button>
           ) : (
-            <div className="flex flex-wrap items-center gap-2">
-              {parentKode && <span className="text-sm text-gray-500">{parentKode}.</span>}
+            <div className="flex flex-wrap items-center gap-2 rounded-lg border border-hairline bg-canvas px-3 py-2">
+              {parentKode && (
+                <span className="font-mono text-xs text-faint">{parentKode}.</span>
+              )}
               <input
                 type="text"
                 placeholder={segmentPlaceholder(level)}
-                className="w-28 rounded-md border border-gray-300 px-2 py-1 text-sm"
+                className={`${fieldSm} w-28 font-mono`}
                 value={newSegment}
                 onChange={(e) => setNewSegment(e.target.value)}
               />
               <input
                 type="text"
                 placeholder="Nama"
-                className="rounded-md border border-gray-300 px-2 py-1 text-sm"
+                className={`${fieldSm} flex-1`}
                 value={newNama}
                 onChange={(e) => setNewNama(e.target.value)}
               />
-              <button
-                type="button"
-                className="text-sm text-blue-600 underline disabled:opacity-50"
-                disabled={busy}
-                onClick={handleCreate}
-              >
+              <button type="button" className={btnPrimary} disabled={busy} onClick={handleCreate}>
                 Simpan
               </button>
-              <button
-                type="button"
-                className="text-sm text-gray-500 underline"
-                onClick={() => setMode('idle')}
-              >
+              <button type="button" className={btnGhost} onClick={() => setMode('idle')}>
                 Batal
               </button>
             </div>
@@ -218,7 +223,7 @@ export function AdminLevelRow({
         </div>
       )}
 
-      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-1.5 text-sm text-danger">{error}</p>}
     </div>
   );
 }

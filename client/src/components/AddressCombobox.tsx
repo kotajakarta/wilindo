@@ -117,11 +117,11 @@ export function AddressCombobox({
 
   return (
     <div className="flex flex-col gap-1" ref={containerRef}>
-      <label className="text-sm font-medium text-gray-700">{label}</label>
+      <label className="text-sm font-medium text-ink">{label}</label>
       <div className="relative">
         <input
           type="text"
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full rounded-lg border border-hairline bg-surface px-3 py-2 text-sm text-ink placeholder:text-faint focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
           placeholder={value ? value.nama : 'Pilih atau cari...'}
           value={query}
           onChange={(e) => {
@@ -132,14 +132,14 @@ export function AddressCombobox({
           onKeyDown={handleKeyDown}
         />
         {open && (
-          <ul className="absolute z-10 mt-1 max-h-64 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg">
-            {loading && <li className="px-3 py-2 text-sm text-gray-500">Memuat...</li>}
+          <ul className="absolute z-10 mt-1 max-h-64 w-full overflow-auto rounded-lg border border-hairline bg-surface shadow-lg">
+            {loading && <li className="px-3 py-2 text-sm text-muted">Memuat...</li>}
             {!loading && error && (
-              <li className="flex items-center justify-between px-3 py-2 text-sm text-red-600">
+              <li className="flex items-center justify-between px-3 py-2 text-sm text-danger">
                 {error}
                 <button
                   type="button"
-                  className="ml-2 text-blue-600 underline"
+                  className="ml-2 font-medium text-brand hover:text-brand-dark"
                   onClick={() => fetchOptions(query)}
                 >
                   Coba lagi
@@ -147,7 +147,7 @@ export function AddressCombobox({
               </li>
             )}
             {!loading && !error && visibleOptions.length === 0 && (
-              <li className="px-3 py-2 text-sm text-gray-500">
+              <li className="px-3 py-2 text-sm text-muted">
                 {!isSearching && level > 1 && !parentKode
                   ? 'Pilih level di atasnya dulu, atau ketik untuk mencari'
                   : 'Tidak ada hasil'}
@@ -163,7 +163,7 @@ export function AddressCombobox({
                   <li
                     key={item.kode}
                     className={`cursor-pointer px-3 py-2 text-sm ${
-                      index === highlightedIndex ? 'bg-blue-50' : ''
+                      index === highlightedIndex ? 'bg-brand-tint' : ''
                     }`}
                     onMouseEnter={() => setHighlightedIndex(index)}
                     onMouseDown={(e) => {
@@ -171,10 +171,10 @@ export function AddressCombobox({
                       selectItem(item);
                     }}
                   >
-                    <div>{item.nama}</div>
+                    <div className="text-ink">{item.nama}</div>
                     {result && result.path.length > 0 && (
-                      <div className="text-xs text-gray-400">
-                        {result.path.map((p) => p.nama).join(', ')}
+                      <div className="font-mono text-[11px] text-faint">
+                        {result.path.map((p) => p.nama).join(' › ')}
                       </div>
                     )}
                   </li>

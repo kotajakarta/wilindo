@@ -17,19 +17,37 @@ export function AdminPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl p-6">
-      <h1 className="mb-4 text-xl font-semibold text-gray-900">Admin CRUD</h1>
-      <div className="mb-6 flex flex-col gap-1">
-        <label className="text-sm font-medium text-gray-700">API Key</label>
+    <div className="mx-auto max-w-4xl px-6 py-10">
+      <p className="text-xs font-medium tracking-wide text-brand uppercase">Admin</p>
+      <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">
+        Kelola Data Wilayah
+      </h1>
+      <p className="mt-2 max-w-2xl text-sm text-muted">
+        Tambah, ubah, atau hapus data wilayah administratif berjenjang. Perubahan berlaku
+        langsung pada database production.
+      </p>
+
+      <div className="mt-6 rounded-xl border border-hairline bg-surface p-6 shadow-sm">
+        <label className="text-sm font-medium text-ink" htmlFor="admin-api-key">
+          Kunci API
+        </label>
         <input
+          id="admin-api-key"
           type="password"
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+          className="mt-1.5 w-full rounded-lg border border-hairline bg-canvas px-3 py-2 font-mono text-sm text-ink placeholder:font-sans placeholder:text-faint focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
           value={apiKey}
           onChange={(e) => handleApiKeyChange(e.target.value)}
-          placeholder="Masukkan API key untuk tambah/ubah/hapus"
+          placeholder="Masukkan kunci API untuk tambah/ubah/hapus"
         />
+        <p className="mt-1.5 text-xs text-faint">
+          Diperlukan hanya untuk menambah, mengubah, atau menghapus data. Disimpan di browser
+          Anda saja, tidak dikirim ke pihak lain.
+        </p>
       </div>
-      <WilayahAdminManager apiKey={apiKey} />
+
+      <div className="mt-6 rounded-xl border border-hairline bg-surface p-6 shadow-sm">
+        <WilayahAdminManager apiKey={apiKey} />
+      </div>
     </div>
   );
 }

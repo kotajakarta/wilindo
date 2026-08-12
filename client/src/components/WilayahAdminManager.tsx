@@ -15,7 +15,7 @@ export function WilayahAdminManager({ apiKey }: WilayahAdminManagerProps) {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col">
       <AdminLevelRow
         label="Provinsi"
         level={1}
