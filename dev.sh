@@ -44,8 +44,9 @@ cleanup() {
   if [[ "$REPLY" =~ ^[Yy]$ ]]; then
     git add -A
     git commit -m "$COMMIT_MSG"
-    git push
-    echo "Perubahan berhasil di-push ke GitHub."
+    git fetch origin master
+    git push --force-with-lease origin master
+    echo "Perubahan berhasil di-push ke GitHub (lokal jadi acuan, menimpa GitHub)."
   else
     echo "Dibatalkan — tidak ada yang di-commit/push."
   fi
