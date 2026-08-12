@@ -18,16 +18,11 @@ if [ -z "$(git status --porcelain)" ]; then
   echo "Tidak ada perubahan untuk di-commit."
 else
   git status --short
-  read -r -p "Commit & push perubahan di atas ke GitHub? [y/N] " REPLY
-  if [[ "$REPLY" =~ ^[Yy]$ ]]; then
-    git add -A
-    git commit -m "$COMMIT_MSG"
-    git fetch origin master
-    git push --force-with-lease origin master
-    echo "Perubahan berhasil di-push ke GitHub (lokal jadi acuan, menimpa GitHub)."
-  else
-    echo "Dibatalkan — tidak ada yang di-commit/push."
-  fi
+  git add -A
+  git commit -m "$COMMIT_MSG"
+  git fetch origin master
+  git push --force-with-lease origin master
+  echo "Perubahan berhasil di-push ke GitHub (lokal jadi acuan, menimpa GitHub)."
 fi
 
 # Install dependency kalau belum ada
