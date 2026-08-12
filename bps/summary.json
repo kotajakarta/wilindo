@@ -1,0 +1,10 @@
+{
+  "periode": "2025_2.2025",
+  "extracted_at": "2026-08-12T08:21:36.225Z",
+  "counts": {
+    "provinsi": 38,
+    "kabkota": 514,
+    "kecamatan": 7291,
+    "desa": 84331
+  }
+}
