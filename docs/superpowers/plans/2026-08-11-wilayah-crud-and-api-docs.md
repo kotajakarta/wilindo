@@ -792,7 +792,7 @@ function App() {
               `text-sm font-medium ${isActive ? 'text-blue-600' : 'text-gray-600'}`
             }
           >
-            Admin Wilayah
+            Admin CRUD
           </NavLink>
         </div>
       </nav>
