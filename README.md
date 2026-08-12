@@ -40,6 +40,14 @@ sama, sehingga production berjalan sebagai satu proses monolitik.
 
 ```
 wilindo/
+├── bps/                     # Ekstraksi data mentah wilayah dari BPS
+│   ├── bps.js                 # Script ekstrak (sig.bps.go.id) -> bps/*.json
+│   ├── provinces.json         # Hasil ekstraksi per level (kode_bps & kode_dagri)
+│   ├── regencies.json
+│   ├── districts.json
+│   ├── villages.json
+│   ├── wilayah-hierarchical.json
+│   └── summary.json           # Ringkasan jumlah baris per level & periode
 ├── client/                 # Frontend React + Vite
 │   └── src/
 │       ├── api/             # Wrapper fetch ke API (wilayah.ts, wilayahAdmin.ts)
@@ -47,6 +55,7 @@ wilindo/
 │       ├── hooks/            # useWilayahSelection
 │       └── pages/            # AddressPage (/), AdminPage (/admin)
 ├── server/                 # Backend Express + TypeScript
+│   ├── sync-bps.js           # Sinkronkan tabel `wilayah` dengan bps/*.json (dry-run/--apply)
 │   └── src/
 │       ├── app.ts             # Setup Express, CORS, static file, error handler
 │       ├── wilayah.routes.ts  # Route /api/wilayah*
@@ -125,6 +134,48 @@ Ringkasan endpoint:
 | POST | `/api/wilayah` | Ya | Buat wilayah baru |
 | PATCH | `/api/wilayah/:kode` | Ya | Ubah nama wilayah |
 | DELETE | `/api/wilayah/:kode` | Ya | Hapus wilayah (harus dari level terbawah dulu) |
+
+## Sinkronisasi Data Wilayah dengan BPS
+
+Kode & nama wilayah di tabel `wilayah` bisa berubah seiring pemutakhiran
+resmi BPS/Kemendagri (pemekaran daerah, perubahan nama, dll). BPS
+menerbitkan pembaruan **per semester (~2x setahun)**, jadi sinkronisasi
+ini cukup dijalankan manual tiap ada rilis periode baru — tidak perlu
+dijadwalkan otomatis.
+
+Dua script terpisah menangani ini:
+
+- **`bps/bps.js`** — ekstrak data mentah terbaru langsung dari
+  `sig.bps.go.id` (Provinsi → Kab/Kota → Kecamatan → Desa/Kelurahan) ke
+  `bps/*.json`. Tiap baris menyimpan dua sistem kode: `kode_bps` (nomor
+  urut BPS, dipakai untuk traversal parent→child) dan `kode_dagri`
+  (nomor urut Kemendagri berjenjang dgn titik, format yang sama dengan
+  `kode` di tabel `wilayah`).
+- **`server/sync-bps.js`** — baca `bps/*.json`, hitung diff
+  (insert/update/delete) terhadap tabel `wilayah` production, dengan mode
+  dry-run (default) dan `--apply`.
+
+Langkah sinkronisasi:
+
+```bash
+# 1. Kalau sudah masuk periode/semester baru, edit dulu nilai PERIODE
+#    di bps/bps.js (mis. dari '2025_2.2025' ke '2026_1.2026').
+
+# 2. Ekstrak data terbaru dari BPS -> menimpa bps/*.json
+node bps/bps.js
+
+# 3. Dry-run: baca bps/*.json, backup tabel wilayah saat ini, tampilkan
+#    ringkasan diff (insert/update/delete). TIDAK mengubah database.
+node server/sync-bps.js
+
+# 4. Kalau ringkasan diff-nya sudah dicek dan wajar, terapkan ke database:
+node server/sync-bps.js --apply
+```
+
+Setiap dry-run menyimpan backup tabel `wilayah` saat ini
+(`server/data/wilayah-backup-*.json`) dan laporan diff lengkap
+(`server/data/bps-sync-report.json`) sebelum apply — kalau hasil apply
+ternyata bermasalah, backup itu jadi acuan untuk rollback manual.
 
 ## Testing
 

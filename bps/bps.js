@@ -13,7 +13,7 @@ const BASE_URL = 'https://sig.bps.go.id/rest-bridging/getwilayah';
 const PERIODE = '2025_2.2025';
 const DELAY_MS = 100;          // delay antar request (ms)
 const CONCURRENCY = 5;         // max concurrent request
-const OUTPUT_DIR = './data-wilayah';
+const OUTPUT_DIR = __dirname;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
