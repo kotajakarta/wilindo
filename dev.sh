@@ -1,6 +1,9 @@
 #!/bin/bash
-# Jalankan server + client untuk development lokal, lalu commit & push
-# perubahan ke GitHub otomatis saat dev session dihentikan (Ctrl+C).
+# Jalankan server + client untuk development lokal. Saat dev session
+# dihentikan (Ctrl+C), tampilkan perubahan yang terjadi dan minta
+# konfirmasi sebelum commit & push ke GitHub — supaya perubahan tak
+# terduga (mis. dari tool lain yang mengubah file di folder ini) tidak
+# ikut ter-push tanpa disadari.
 #
 # Pakai: ./dev.sh ["pesan commit custom"]
 set -e
@@ -29,14 +32,22 @@ cleanup() {
   kill "$SERVER_PID" "$CLIENT_PID" 2>/dev/null || true
   wait "$SERVER_PID" "$CLIENT_PID" 2>/dev/null || true
 
-  echo "=== Sync perubahan ke GitHub ==="
-  if [ -n "$(git status --porcelain)" ]; then
+  echo ""
+  echo "=== Perubahan yang terdeteksi ==="
+  if [ -z "$(git status --porcelain)" ]; then
+    echo "Tidak ada perubahan untuk di-commit."
+    return
+  fi
+  git status --short
+
+  read -r -p "Commit & push perubahan di atas ke GitHub? [y/N] " REPLY
+  if [[ "$REPLY" =~ ^[Yy]$ ]]; then
     git add -A
     git commit -m "$COMMIT_MSG"
     git push
     echo "Perubahan berhasil di-push ke GitHub."
   else
-    echo "Tidak ada perubahan untuk di-commit."
+    echo "Dibatalkan — tidak ada yang di-commit/push."
   fi
 }
 trap cleanup EXIT
