@@ -6,7 +6,7 @@ menyediakan data wilayah administratif Indonesia secara berjenjang —
 API, lengkap dengan antarmuka contekan (dropdown alamat bertingkat) dan
 halaman admin untuk kelola data.
 
-Live: **https://wilindo.aithendi.my.id**
+Live: **https://wil.nri.my.id**
 
 ## Fitur Utama
 
@@ -30,7 +30,7 @@ Live: **https://wilindo.aithendi.my.id**
 | Server   | Node.js, Express 5, TypeScript, MySQL2 (MariaDB), Vitest |
 | Client   | React 19, React Router 7, Vite, Tailwind CSS 4, TypeScript |
 | Database | MariaDB — satu tabel `wilayah` (`kode`, `nama`) |
-| Deploy   | Podman Quadlet (rootless container), reverse proxy ke `wilindo.aithendi.my.id` |
+| Deploy   | Podman Quadlet (rootless container), reverse proxy ke `wil.nri.my.id` |
 
 Server dan client dibangun terpisah lalu digabung: hasil build client
 (`client/dist`) disajikan sebagai static file oleh server Express yang
