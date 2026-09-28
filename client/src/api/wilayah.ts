@@ -19,3 +19,18 @@ export async function searchWilayah(
   if (!res.ok) throw new Error('Gagal mencari wilayah');
   return res.json();
 }
+
+export interface WilayahMeta {
+  periode: string;
+  year: string;
+  semester: string;
+  label: string;
+  updatedAt?: string;
+}
+
+export async function getWilayahMeta(): Promise<WilayahMeta> {
+  const res = await fetch('/api/wilayah/meta');
+  if (!res.ok) throw new Error('Gagal memuat info wilayah');
+  return res.json();
+}
+

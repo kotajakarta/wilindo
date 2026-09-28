@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import fs from 'node:fs';
+import path from 'node:path';
 import { pool } from './db';
 import { requireApiKey } from './auth';
 import { bpsSyncManager } from './bps-sync.service';
@@ -13,6 +15,50 @@ import {
 } from './wilayah.service';
 
 export const wilayahRouter = Router();
+
+wilayahRouter.get('/wilayah/meta', (_req, res) => {
+  try {
+    const summaryPath = path.resolve(__dirname, '../../bps/summary.json');
+    const reportPath = path.resolve(__dirname, '../data/bps-sync-report.json');
+
+    let periode = '2025_2.2025';
+    let updatedAt: string | undefined;
+
+    if (fs.existsSync(reportPath)) {
+      try {
+        const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+        if (report.periode) periode = report.periode;
+        if (report.generated_at) updatedAt = report.generated_at;
+      } catch {}
+    } else if (fs.existsSync(summaryPath)) {
+      try {
+        const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf8'));
+        if (summary.periode) periode = summary.periode;
+        if (summary.extracted_at) updatedAt = summary.extracted_at;
+      } catch {}
+    }
+
+    const match = periode.match(/^(\d{4})_(\d+)/);
+    const year = match ? match[1] : '2025';
+    const semester = match ? match[2] : '2';
+    const label = match ? `Tahun ${year} Semester ${semester}` : `Periode ${periode}`;
+
+    res.json({
+      periode,
+      year,
+      semester,
+      label,
+      updatedAt,
+    });
+  } catch {
+    res.json({
+      periode: '2025_2.2025',
+      year: '2025',
+      semester: '2',
+      label: 'Tahun 2025 Semester 2',
+    });
+  }
+});
 
 function mutationErrorStatus(error: WilayahMutationError): number {
   switch (error) {

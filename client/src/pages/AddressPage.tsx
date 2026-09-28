@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { WilayahDropdown, type WilayahSelection } from '../components/WilayahDropdown';
+import { getWilayahMeta, type WilayahMeta } from '../api/wilayah';
 
 function selectedPath(selection: WilayahSelection) {
   return [selection.provinsi, selection.kabupaten, selection.kecamatan, selection.desa].filter(
@@ -9,8 +10,17 @@ function selectedPath(selection: WilayahSelection) {
 
 export function AddressPage() {
   const [selection, setSelection] = useState<WilayahSelection | null>(null);
+  const [meta, setMeta] = useState<WilayahMeta | null>(null);
   const path = selection ? selectedPath(selection) : [];
   const deepest = path.at(-1);
+
+  useEffect(() => {
+    getWilayahMeta()
+      .then((data) => setMeta(data))
+      .catch(() => {
+        // Abaikan jika gagal memuat, gunakan fallback default
+      });
+  }, []);
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-10">
@@ -49,8 +59,9 @@ export function AddressPage() {
         >
           sig.bps.go.id/bridging-kode
         </a>{' '}
-        — Badan Pusat Statistik, Tahun 2025 Semester 2.
+        — Badan Pusat Statistik, {meta?.label ?? 'Tahun 2025 Semester 2'}.
       </p>
     </div>
   );
 }
+
