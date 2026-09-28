@@ -59,7 +59,7 @@ export function AddressPage() {
         >
           sig.bps.go.id/bridging-kode
         </a>{' '}
-        — Badan Pusat Statistik, {meta?.label ?? 'Tahun 2025 Semester 2'}.
+        — Badan Pusat Statistik - Kemendagri, {meta?.label ?? 'Tahun 2025 Semester 2'}.
       </p>
     </div>
   );
