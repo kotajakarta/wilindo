@@ -15,7 +15,9 @@ provinsi → kabupaten/kota → kecamatan → desa) di aplikasi lain — cukup 2
 endpoint baca, **tidak perlu API key sama sekali**:
 
 1. `GET /api/wilayah?parent=<kode>` — isi pilihan tiap level (children dari kode yang dipilih di level atasnya; tanpa `parent` = semua provinsi).
-2. `GET /api/wilayah/search?level=<1-4>&q=<teks>` — untuk pencarian/typeahead per level, hasilnya sudah termasuk `path` (breadcrumb) untuk auto-isi level di atasnya kalau user langsung pilih dari hasil pencarian.
+2. `GET /api/wilayah/quick-search?q=<teks/kodepos>` — pencarian cepat terpadu nama kecamatan, kelurahan/desa, atau 5-digit kode pos.
+3. `GET /api/wilayah/search?level=<1-4>&q=<teks>` — untuk pencarian/typeahead per level, hasilnya sudah termasuk `path` (breadcrumb) untuk auto-isi level di atasnya.
+4. `GET /api/docs/spec.json` — spesifikasi lengkap dalam format JSON terstruktur siap konsumsi untuk AI Coding Assistant (Cursor, Copilot, Claude Code). Tersedia juga tombol **"Salin JSON untuk AI"** di bagian atas halaman `/instruksi-api`.
 
 Lihat bagian **"Pola Integrasi Dropdown Bertingkat"** di bawah untuk alur
 lengkapnya. Endpoint `POST`/`PATCH`/`DELETE` (butuh `X-API-Key`) hanya

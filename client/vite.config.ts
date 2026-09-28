@@ -13,6 +13,10 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), tailwindcss()],
     server: {
+      watch: {
+        usePolling: true,
+        interval: 300,
+      },
       // Allow reading instruksi-api-produksi.md from the project root
       // (one level above client/) for the "Instruksi API" page.
       fs: { allow: [path.resolve(import.meta.dirname, '..')] },

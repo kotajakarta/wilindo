@@ -61,6 +61,17 @@ wilayahRouter.get('/wilayah/meta', (_req, res) => {
   }
 });
 
+wilayahRouter.get('/docs/spec.json', (_req, res) => {
+  const specPath = path.resolve(__dirname, '../../client/src/data/wilindo-api-spec.json');
+  if (fs.existsSync(specPath)) {
+    res.setHeader('Content-Type', 'application/json');
+    res.sendFile(specPath);
+    return;
+  }
+  res.status(404).json({ error: 'Spec not found' });
+});
+
+
 function mutationErrorStatus(error: WilayahMutationError): number {
   switch (error) {
     case 'invalid_kode_format':

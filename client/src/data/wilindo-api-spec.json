@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "Wilindo API Specification for AI Agents",
+  "version": "1.2.0",
+  "base_url": "https://wil.nri.my.id",
+  "description": "Registry dan REST API data wilayah administratif Indonesia berjenjang (Provinsi, Kab/Kota, Kecamatan, Kelurahan/Desa) beserta Kode Pos resmi BPS & Kemendagri.",
+  "quick_context_for_ai": "Gunakan spesifikasi JSON ini untuk mengimplementasikan form alamat berjenjang (cascading dropdown), pencarian alamat otomatis, validasi kode wilayah Kemendagri, atau pengambilan data kode pos Indonesia. Pembacaan data (GET) adalah 100% publik tanpa API key.",
+  "authentication": {
+    "public_endpoints": "GET /api/wilayah, GET /api/wilayah/search, GET /api/wilayah/quick-search, GET /api/wilayah/meta (bebas diakses tanpa auth)",
+    "admin_endpoints": "POST /api/wilayah, PATCH /api/wilayah/:kode, DELETE /api/wilayah/:kode (wajib menyertakan header 'X-API-Key: <kunci_api>')"
+  },
+  "hierarchy_levels": {
+    "1": "Provinsi (kode format: '11', '32')",
+    "2": "Kabupaten/Kota (kode format: '11.01', '32.01')",
+    "3": "Kecamatan (kode format: '11.01.01', '32.01.01')",
+    "4": "Kelurahan/Desa (kode format: '11.01.01.2001', '32.01.01.2001')"
+  },
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/wilayah",
+      "description": "Mengambil daftar anak wilayah langsung dari kode parent. Tanpa query parent, mengembalikan seluruh 38 provinsi di Indonesia.",
+      "parameters": [
+        {
+          "name": "parent",
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "example": "32",
+          "description": "Kode induk wilayah. Contoh: '32' untuk daftar kab/kota di Jabar, atau '32.03.05' untuk daftar desa di Kec. Cianjur."
+        }
+      ],
+      "response": {
+        "status": 200,
+        "type": "array",
+        "sample": [
+          { "kode": "11", "nama": "Aceh" },
+          { "kode": "32.03.05.2001", "nama": "Sukamaju", "kodepos": "43284" }
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/wilayah/quick-search",
+      "description": "Pencarian cepat terpadu (omnibox) untuk nama Kecamatan, Desa/Kelurahan, ataupun pencarian langsung dengan 5 digit angka kode pos.",
+      "parameters": [
+        {
+          "name": "q",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "example": "sukamaju",
+          "description": "Kata kunci nama kecamatan/desa ATAU angka 5 digit kode pos (misal '43284')."
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "number",
+          "required": false,
+          "default": 15,
+          "max": 30
+        }
+      ],
+      "response": {
+        "status": 200,
+        "type": "array",
+        "sample": [
+          {
+            "kode": "32.03.05.2001",
+            "nama": "Sukamaju",
+            "level": 4,
+            "kodepos": "43284",
+            "path": [
+              { "kode": "32", "nama": "Jawa Barat" },
+              { "kode": "32.03", "nama": "Kabupaten Cianjur" },
+              { "kode": "32.03.05", "nama": "Kecamatan Cianjur" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/wilayah/search",
+      "description": "Pencarian nama wilayah dalam satu level tertentu.",
+      "parameters": [
+        { "name": "level", "in": "query", "type": "number (1|2|3|4)", "required": true },
+        { "name": "q", "in": "query", "type": "string", "required": true },
+        { "name": "limit", "in": "query", "type": "number", "default": 20, "max": 50 }
+      ],
+      "response": {
+        "status": 200,
+        "type": "array",
+        "sample": [
+          {
+            "kode": "32.03.05.2001",
+            "nama": "Sukamaju",
+            "kodepos": "43284",
+            "path": [
+              { "kode": "32", "nama": "Jawa Barat" },
+              { "kode": "32.03", "nama": "Kabupaten Cianjur" },
+              { "kode": "32.03.05", "nama": "Kecamatan Cianjur" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/wilayah/meta",
+      "description": "Mendapatkan informasi periode pembaruan data semesteran resmi BPS.",
+      "response": {
+        "status": 200,
+        "sample": {
+          "periode": "2025_2.2025",
+          "year": "2025",
+          "semester": "2",
+          "label": "Tahun 2025 Semester 2",
+          "updatedAt": "2026-08-12T08:48:16.228Z"
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/wilayah",
+      "auth_required": true,
+      "description": "Menambahkan data wilayah baru ke database.",
+      "headers": { "X-API-Key": "<API_KEY>" },
+      "body": { "kode": "11.02", "nama": "Kabupaten Aceh Selatan" }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/wilayah/:kode",
+      "auth_required": true,
+      "description": "Mengubah nama wilayah.",
+      "headers": { "X-API-Key": "<API_KEY>" },
+      "body": { "nama": "Nama Wilayah Baru" }
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/wilayah/:kode",
+      "auth_required": true,
+      "description": "Menghapus data wilayah (hanya jika tidak memiliki anak wilayah).",
+      "headers": { "X-API-Key": "<API_KEY>" }
+    }
+  ],
+  "typescript_types": {
+    "WilayahItem": "export interface WilayahItem {\n  kode: string;\n  nama: string;\n  kodepos?: string | null;\n}",
+    "WilayahSearchResult": "export interface WilayahSearchResult extends WilayahItem {\n  path: WilayahItem[];\n}",
+    "QuickSearchResult": "export interface QuickSearchResult extends WilayahItem {\n  level: 3 | 4;\n  path: WilayahItem[];\n}"
+  },
+  "implementation_recipes_for_ai": {
+    "cascading_dropdown": [
+      "1. Panggil GET /api/wilayah saat komponen mount untuk mengisi opsi Provinsi.",
+      "2. Ketika Provinsi dipilih, reset Kab/Kota, Kec, Desa, lalu panggil GET /api/wilayah?parent={provinsiKode} untuk mengisi Kab/Kota.",
+      "3. Ketika Kab/Kota dipilih, reset Kec & Desa, lalu panggil GET /api/wilayah?parent={kabupatenKode} untuk mengisi Kecamatan.",
+      "4. Ketika Kecamatan dipilih, reset Desa, lalu panggil GET /api/wilayah?parent={kecamatanKode} untuk mengisi Kelurahan/Desa.",
+      "5. Ketika Kelurahan/Desa dipilih, baca field 'kodepos' untuk otomatis mengisi input kode pos pengiriman."
+    ],
+    "quick_search_autocomplete": [
+      "1. Buat input pencarian bebas dengan debounce 200ms.",
+      "2. Panggil GET /api/wilayah/quick-search?q={query}.",
+      "3. Tampilkan hasil dengan nama, level, badge kodepos, dan breadcrumb 'path'.",
+      "4. Saat pengguna memilih salah satu item, isi ke-4 dropdown di atasnya secara otomatis menggunakan elemen di dalam array 'path'."
+    ]
+  },
+  "code_snippets": {
+    "javascript_fetch": "const BASE_URL = 'https://wil.nri.my.id';\n\n// 1. Ambil Provinsi\nconst provinces = await fetch(`${BASE_URL}/api/wilayah`).then(r => r.json());\n\n// 2. Ambil Anak Wilayah\nconst regencies = await fetch(`${BASE_URL}/api/wilayah?parent=32`).then(r => r.json());\n\n// 3. Quick Search (Nama / Kode Pos)\nconst search = await fetch(`${BASE_URL}/api/wilayah/quick-search?q=sukamaju`).then(r => r.json());"
+  }
+}
