@@ -45,3 +45,12 @@ export async function deleteWilayah(kode: string, apiKey: string): Promise<void>
   });
   if (!res.ok) throw new Error(await parseErrorMessage(res));
 }
+
+export async function verifyAdminApiKey(apiKey: string): Promise<boolean> {
+  const res = await fetch('/api/admin/verify-key', {
+    method: 'POST',
+    headers: { 'X-API-Key': apiKey },
+  });
+  return res.ok;
+}
+

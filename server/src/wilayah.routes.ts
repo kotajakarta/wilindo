@@ -133,6 +133,10 @@ wilayahRouter.delete('/wilayah/:kode', requireApiKey, async (req, res, next) => 
 });
 
 // ==================== BPS SYNC ADMIN ROUTES ====================
+wilayahRouter.post('/admin/verify-key', requireApiKey, (_req, res) => {
+  res.json({ ok: true });
+});
+
 wilayahRouter.get('/admin/bps-sync/status', (_req, res) => {
   res.json(bpsSyncManager.getProgress());
 });
