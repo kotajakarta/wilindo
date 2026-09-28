@@ -51,10 +51,9 @@ function NavTab({ to, end, children }: { to: string; end?: boolean; children: Re
       to={to}
       end={end}
       className={({ isActive }) =>
-        `border-b-2 px-1 py-2.5 text-sm font-medium transition-colors ${
-          isActive
-            ? 'border-brand text-ink'
-            : 'border-transparent text-muted hover:text-ink'
+        `border-b-2 px-1 py-2.5 text-sm font-medium transition-colors ${isActive
+          ? 'border-brand text-ink'
+          : 'border-transparent text-muted hover:text-ink'
         }`
       }
     >
@@ -86,7 +85,7 @@ function App() {
             <NavTab to="/" end>
               Alamat
             </NavTab>
-            <NavTab to="/admin">Admin CRUD</NavTab>
+            <NavTab to="/admin">Update Data</NavTab>
             <NavTab to="/instruksi-api">Instruksi API</NavTab>
           </nav>
         </div>
