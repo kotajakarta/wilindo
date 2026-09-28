@@ -4,14 +4,16 @@ import { useWilayahSelection } from '../hooks/useWilayahSelection';
 
 interface WilayahAdminManagerProps {
   apiKey: string;
+  externalRefreshToken?: number;
 }
 
-export function WilayahAdminManager({ apiKey }: WilayahAdminManagerProps) {
+export function WilayahAdminManager({ apiKey, externalRefreshToken = 0 }: WilayahAdminManagerProps) {
   const { selection, setProvinsi, setKabupaten, setKecamatan, setDesa } = useWilayahSelection();
-  const [refreshToken, setRefreshToken] = useState(0);
+  const [internalRefreshToken, setInternalRefreshToken] = useState(0);
+  const refreshToken = internalRefreshToken + externalRefreshToken;
 
   function handleMutated() {
-    setRefreshToken((t) => t + 1);
+    setInternalRefreshToken((t) => t + 1);
   }
 
   return (

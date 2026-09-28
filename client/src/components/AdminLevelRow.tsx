@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { AddressCombobox } from './AddressCombobox';
 import type { WilayahItem, WilayahLevel } from '../types/wilayah';
-import { getChildren } from '../api/wilayah';
-import { createWilayah, updateWilayahNama, deleteWilayah } from '../api/wilayahAdmin';
+import { updateWilayahNama, deleteWilayah } from '../api/wilayahAdmin';
 
 interface AdminLevelRowProps {
   label: string;
@@ -24,29 +23,6 @@ const btnPrimary =
 const fieldSm =
   'rounded-md border border-hairline bg-surface px-2 py-1 text-sm text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand';
 
-function segmentWidth(level: WilayahLevel): number {
-  return level === 4 ? 4 : 2;
-}
-
-function segmentPlaceholder(level: WilayahLevel): string {
-  return level === 4 ? '4 digit (mis. 2001)' : '2 digit (mis. 01)';
-}
-
-async function suggestNextSegment(parentKode: string | undefined, level: WilayahLevel): Promise<string> {
-  const width = segmentWidth(level);
-  try {
-    const siblings = await getChildren(parentKode);
-    const maxNumber = siblings.reduce((max, item) => {
-      const lastSegment = item.kode.split('.').pop() ?? '';
-      const num = parseInt(lastSegment, 10);
-      return Number.isFinite(num) && num > max ? num : max;
-    }, 0);
-    return String(maxNumber + 1).padStart(width, '0');
-  } catch {
-    return ''; // fetch failed; let the admin type the segment manually
-  }
-}
-
 export function AdminLevelRow({
   label,
   level,
@@ -57,14 +33,10 @@ export function AdminLevelRow({
   refreshToken,
   onMutated,
 }: AdminLevelRowProps) {
-  const [mode, setMode] = useState<'idle' | 'editing' | 'adding'>('idle');
+  const [isEditing, setIsEditing] = useState(false);
   const [pendingNama, setPendingNama] = useState('');
-  const [newSegment, setNewSegment] = useState('');
-  const [newNama, setNewNama] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const canAdd = level === 1 || Boolean(parentKode);
 
   async function handleSaveEdit() {
     if (!selected) return;
@@ -74,7 +46,7 @@ export function AdminLevelRow({
       const updated = await updateWilayahNama(selected.kode, pendingNama, apiKey);
       onSelect(updated);
       onMutated();
-      setMode('idle');
+      setIsEditing(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Terjadi kesalahan, coba lagi');
     } finally {
@@ -98,30 +70,6 @@ export function AdminLevelRow({
     }
   }
 
-  async function handleOpenAdd() {
-    setMode('adding');
-    setNewNama('');
-    setNewSegment(await suggestNextSegment(parentKode, level));
-  }
-
-  async function handleCreate() {
-    const kode = parentKode ? `${parentKode}.${newSegment}` : newSegment;
-    setBusy(true);
-    setError(null);
-    try {
-      const created = await createWilayah(kode, newNama, apiKey);
-      onSelect(created);
-      onMutated();
-      setNewSegment('');
-      setNewNama('');
-      setMode('idle');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Terjadi kesalahan, coba lagi');
-    } finally {
-      setBusy(false);
-    }
-  }
-
   return (
     <div className="border-b border-hairline pt-5 pb-5 first:pt-0 last:border-0 last:pb-0">
       <AddressCombobox
@@ -131,12 +79,12 @@ export function AdminLevelRow({
         value={selected}
         onChange={(item) => {
           onSelect(item);
-          setMode('idle');
+          setIsEditing(false);
         }}
         refreshToken={refreshToken}
       />
 
-      {selected && mode === 'idle' && (
+      {selected && !isEditing && (
         <div className="mt-2 flex items-center justify-between gap-3 rounded-lg border border-hairline bg-canvas px-3 py-2">
           <div className="flex min-w-0 items-center gap-2">
             <span className="shrink-0 rounded bg-brand-tint px-1.5 py-0.5 font-mono text-[11px] font-medium text-brand">
@@ -150,7 +98,7 @@ export function AdminLevelRow({
               className={btnGhost}
               onClick={() => {
                 setPendingNama(selected.nama);
-                setMode('editing');
+                setIsEditing(true);
               }}
             >
               Ubah
@@ -162,7 +110,7 @@ export function AdminLevelRow({
         </div>
       )}
 
-      {selected && mode === 'editing' && (
+      {selected && isEditing && (
         <div className="mt-2 flex flex-wrap items-center gap-2 rounded-lg border border-hairline bg-canvas px-3 py-2">
           <span className="shrink-0 rounded bg-brand-tint px-1.5 py-0.5 font-mono text-[11px] font-medium text-brand">
             {selected.kode}
@@ -177,49 +125,9 @@ export function AdminLevelRow({
           <button type="button" className={btnPrimary} disabled={busy} onClick={handleSaveEdit}>
             Simpan
           </button>
-          <button type="button" className={btnGhost} onClick={() => setMode('idle')}>
+          <button type="button" className={btnGhost} onClick={() => setIsEditing(false)}>
             Batal
           </button>
-        </div>
-      )}
-
-      {canAdd && (
-        <div className="mt-2">
-          {mode !== 'adding' ? (
-            <button
-              type="button"
-              className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-hairline py-2 text-xs font-medium text-muted hover:border-brand hover:text-brand"
-              onClick={handleOpenAdd}
-            >
-              + Tambah {label}
-            </button>
-          ) : (
-            <div className="flex flex-wrap items-center gap-2 rounded-lg border border-hairline bg-canvas px-3 py-2">
-              {parentKode && (
-                <span className="font-mono text-xs text-faint">{parentKode}.</span>
-              )}
-              <input
-                type="text"
-                placeholder={segmentPlaceholder(level)}
-                className={`${fieldSm} w-28 font-mono`}
-                value={newSegment}
-                onChange={(e) => setNewSegment(e.target.value)}
-              />
-              <input
-                type="text"
-                placeholder="Nama"
-                className={`${fieldSm} flex-1`}
-                value={newNama}
-                onChange={(e) => setNewNama(e.target.value)}
-              />
-              <button type="button" className={btnPrimary} disabled={busy} onClick={handleCreate}>
-                Simpan
-              </button>
-              <button type="button" className={btnGhost} onClick={() => setMode('idle')}>
-                Batal
-              </button>
-            </div>
-          )}
         </div>
       )}
 

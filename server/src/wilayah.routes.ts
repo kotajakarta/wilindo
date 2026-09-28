@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { pool } from './db';
 import { requireApiKey } from './auth';
+import { bpsSyncManager } from './bps-sync.service';
 import {
   getChildren,
   searchWilayah,
@@ -129,4 +130,50 @@ wilayahRouter.delete('/wilayah/:kode', requireApiKey, async (req, res, next) => 
   } catch (err) {
     next(err);
   }
+});
+
+// ==================== BPS SYNC ADMIN ROUTES ====================
+wilayahRouter.get('/admin/bps-sync/status', (_req, res) => {
+  res.json(bpsSyncManager.getProgress());
+});
+
+wilayahRouter.post('/admin/bps-sync/start', requireApiKey, async (req, res) => {
+  const current = bpsSyncManager.getProgress();
+  if (current.isRunning) {
+    res.status(409).json({ error: 'Proses sinkronisasi sedang berjalan' });
+    return;
+  }
+
+  const mode = req.body?.mode === 'local' ? 'local' : 'online';
+  const periode = typeof req.body?.periode === 'string' && req.body.periode.trim()
+    ? req.body.periode.trim()
+    : '2025_2.2025';
+
+  try {
+    await bpsSyncManager.startSync(mode, periode);
+    res.json({ ok: true, progress: bpsSyncManager.getProgress() });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Gagal memulai sinkronisasi' });
+  }
+});
+
+wilayahRouter.get('/admin/bps-sync/progress', (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
+  res.flushHeaders?.();
+
+  const unsubscribe = bpsSyncManager.subscribe((progress) => {
+    res.write(`data: ${JSON.stringify(progress)}\n\n`);
+  });
+
+  const keepAliveTimer = setInterval(() => {
+    res.write(': keepalive\n\n');
+  }, 15000);
+
+  req.on('close', () => {
+    clearInterval(keepAliveTimer);
+    unsubscribe();
+  });
 });
