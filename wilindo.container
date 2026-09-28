@@ -8,7 +8,7 @@ After=network-online.target
 Image=docker.io/library/node:24-alpine
 WorkingDir=/app
 
-# Nama container — dipakai reverse proxy/cloudflared untuk routing wilindo.aithendi.my.id ke sini
+# Nama container — dipakai reverse proxy/cloudflared untuk routing wil.nri.my.id ke sini
 ContainerName=wilindo
 
 # Menghubungkan container langsung ke jaringan Podman 'global_net'

@@ -10,11 +10,11 @@ tidak perlu install/jalankan apa pun sendiri.
 ## Base URL
 
 ```
-https://wilindo.aithendi.my.id
+https://wil.nri.my.id
 ```
 
 Semua path di bawah relatif terhadap base URL ini (mis.
-`https://wilindo.aithendi.my.id/api/wilayah`). HTTPS, CORS diizinkan untuk
+`https://wil.nri.my.id/api/wilayah`). HTTPS, CORS diizinkan untuk
 semua origin — endpoint `GET` bisa dipanggil langsung dari browser
 (frontend JS) tanpa proxy tambahan.
 
@@ -101,7 +101,7 @@ dipakai.
 Ambil daftar anak langsung dari sebuah kode. Tanpa `parent`, hasilnya
 semua provinsi.
 
-**Contoh:** `GET https://wilindo.aithendi.my.id/api/wilayah?parent=11`
+**Contoh:** `GET https://wil.nri.my.id/api/wilayah?parent=11`
 
 **Response `200`:**
 ```json
@@ -114,7 +114,7 @@ Cari nama wilayah secara global (lintas seluruh Indonesia) dalam satu
 level. `level` wajib (1-4), `q` wajib (non-empty), `limit` opsional
 (default 20, maksimum 50).
 
-**Contoh:** `GET https://wilindo.aithendi.my.id/api/wilayah/search?level=4&q=sukamaju&limit=5`
+**Contoh:** `GET https://wil.nri.my.id/api/wilayah/search?level=4&q=sukamaju&limit=5`
 
 **Response `200`:**
 ```json
@@ -184,32 +184,32 @@ API key tidak valid.
 
 ```bash
 # Baca semua provinsi
-curl "https://wilindo.aithendi.my.id/api/wilayah"
+curl "https://wil.nri.my.id/api/wilayah"
 
 # Cari nama desa
-curl "https://wilindo.aithendi.my.id/api/wilayah/search?level=4&q=sukamaju&limit=5"
+curl "https://wil.nri.my.id/api/wilayah/search?level=4&q=sukamaju&limit=5"
 
 # Tambah data (butuh API key)
-curl -X POST "https://wilindo.aithendi.my.id/api/wilayah" \
+curl -X POST "https://wil.nri.my.id/api/wilayah" \
   -H "Content-Type: application/json" \
   -H "X-API-Key: GANTI_DENGAN_API_KEY_PRODUCTION" \
   -d '{"kode":"11.02","nama":"Kabupaten Aceh Selatan"}'
 
 # Ubah nama
-curl -X PATCH "https://wilindo.aithendi.my.id/api/wilayah/11.02" \
+curl -X PATCH "https://wil.nri.my.id/api/wilayah/11.02" \
   -H "Content-Type: application/json" \
   -H "X-API-Key: GANTI_DENGAN_API_KEY_PRODUCTION" \
   -d '{"nama":"Nama Baru"}'
 
 # Hapus
-curl -X DELETE "https://wilindo.aithendi.my.id/api/wilayah/11.02" \
+curl -X DELETE "https://wil.nri.my.id/api/wilayah/11.02" \
   -H "X-API-Key: GANTI_DENGAN_API_KEY_PRODUCTION"
 ```
 
 ### Node.js (`fetch`, built-in sejak Node 18)
 
 ```js
-const BASE_URL = 'https://wilindo.aithendi.my.id';
+const BASE_URL = 'https://wil.nri.my.id';
 const API_KEY = process.env.WILAYAH_API_KEY; // simpan API key di env, jangan hardcode
 
 // Baca
@@ -269,7 +269,7 @@ async function deleteWilayah(kode) {
 ```php
 <?php
 
-define('BASE_URL', 'https://wilindo.aithendi.my.id');
+define('BASE_URL', 'https://wil.nri.my.id');
 define('API_KEY', getenv('WILAYAH_API_KEY')); // simpan API key di env, jangan hardcode
 
 // Baca (GET sederhana, tanpa header khusus)
@@ -359,7 +359,7 @@ function deleteWilayah(string $kode): void {
 
 Untuk AI/developer yang mengadaptasi aplikasi lain agar pakai API production ini:
 
-1. Base URL sudah tetap: `https://wilindo.aithendi.my.id` — simpan sebagai env var di aplikasi yang mengintegrasikan (mis. `WILAYAH_API_BASE_URL`), jangan hardcode di banyak tempat.
+1. Base URL sudah tetap: `https://wil.nri.my.id` — simpan sebagai env var di aplikasi yang mengintegrasikan (mis. `WILAYAH_API_BASE_URL`), jangan hardcode di banyak tempat.
 2. Kalau cuma butuh dropdown/tampilan alamat (kasus paling umum): implementasikan fetch wrapper untuk `GET /api/wilayah` dan `GET /api/wilayah/search` saja, ikuti "Pola Integrasi Dropdown Bertingkat" di atas. Tidak perlu API key.
 3. Kalau juga butuh kelola data wilayah (tambah/ubah/hapus): **minta `API_KEY` production ke pemilik project** (jangan ditebak/dicari sendiri), simpan sebagai secret/env var di aplikasi lain — jangan pernah expose ke frontend/browser, panggil endpoint mutasi dari backend saja.
 4. Tangani response non-2xx secara seragam: body selalu `{"error": "<pesan>"}` pada kegagalan, tampilkan/log pesan ini apa adanya (sudah dalam Bahasa Indonesia, siap ditampilkan ke user).
