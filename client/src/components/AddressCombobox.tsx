@@ -171,7 +171,14 @@ export function AddressCombobox({
                       selectItem(item);
                     }}
                   >
-                    <div className="text-ink">{item.nama}</div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-ink">{item.nama}</span>
+                      {item.kodepos && (
+                        <span className="rounded bg-brand-tint px-1.5 py-0.5 font-mono text-[11px] font-semibold text-brand">
+                          {item.kodepos}
+                        </span>
+                      )}
+                    </div>
                     {result && result.path.length > 0 && (
                       <div className="font-mono text-[11px] text-faint">
                         {result.path.map((p) => p.nama).join(' › ')}

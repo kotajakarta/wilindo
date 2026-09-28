@@ -1,6 +1,7 @@
 export interface WilayahItem {
   kode: string;
   nama: string;
+  kodepos?: string | null;
 }
 
 export interface WilayahSearchResult extends WilayahItem {

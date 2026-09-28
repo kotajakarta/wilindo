@@ -39,13 +39,28 @@ export function AddressPage() {
 
       {deepest && (
         <div className="mt-4 rounded-xl border border-hairline bg-surface p-6 shadow-sm">
-          <p className="text-xs font-medium tracking-wide text-muted uppercase">
-            Kode Wilayah Terpilih
-          </p>
-          <p className="mt-2 font-mono text-lg font-medium text-ink">{deepest.kode}</p>
-          <p className="mt-1 text-sm text-muted">
-            {path.map((item) => item.nama).join(' › ')}
-          </p>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <p className="text-xs font-medium tracking-wide text-muted uppercase">
+                Kode Wilayah Terpilih
+              </p>
+              <p className="mt-1.5 font-mono text-lg font-medium text-ink">{deepest.kode}</p>
+              <p className="mt-1 text-sm text-muted">
+                {path.map((item) => item.nama).join(' › ')}
+              </p>
+            </div>
+
+            {deepest.kodepos && (
+              <div className="rounded-xl border border-brand/20 bg-brand-tint/60 px-5 py-3 sm:text-right shrink-0">
+                <p className="text-xs font-medium tracking-wide text-brand uppercase">
+                  Kode Pos
+                </p>
+                <p className="mt-0.5 font-mono text-2xl font-bold tracking-wider text-brand">
+                  {deepest.kodepos}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       )}
 

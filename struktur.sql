@@ -32,6 +32,18 @@ CREATE TABLE `wilayah` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `wilayah_kodepos`
+--
+
+DROP TABLE IF EXISTS `wilayah_kodepos`;
+CREATE TABLE `wilayah_kodepos` (
+  `kode` varchar(13) NOT NULL,
+  `kodepos` varchar(5) DEFAULT NULL,
+  PRIMARY KEY (`kode`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+--
 -- Dumping routines for database 'wilindo'
 --
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

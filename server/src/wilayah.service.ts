@@ -1,6 +1,7 @@
 export interface WilayahItem {
   kode: string;
   nama: string;
+  kodepos?: string | null;
 }
 
 export interface WilayahSearchResult extends WilayahItem {
@@ -19,22 +20,22 @@ export async function getChildren(
 ): Promise<WilayahItem[]> {
   if (!parentKode) {
     const [rows] = await pool.query(
-      "SELECT kode, nama FROM wilayah WHERE kode NOT LIKE '%.%' ORDER BY nama"
+      "SELECT w.kode, w.nama, k.kodepos FROM wilayah w LEFT JOIN wilayah_kodepos k ON w.kode = k.kode WHERE w.kode NOT LIKE '%.%' ORDER BY w.nama"
     );
     return rows as WilayahItem[];
   }
   const [rows] = await pool.query(
-    "SELECT kode, nama FROM wilayah WHERE kode LIKE CONCAT(?, '.%') AND kode NOT LIKE CONCAT(?, '.%.%') ORDER BY nama",
+    "SELECT w.kode, w.nama, k.kodepos FROM wilayah w LEFT JOIN wilayah_kodepos k ON w.kode = k.kode WHERE w.kode LIKE CONCAT(?, '.%') AND w.kode NOT LIKE CONCAT(?, '.%.%') ORDER BY w.nama",
     [parentKode, parentKode]
   );
   return rows as WilayahItem[];
 }
 
 function levelWhereClause(level: WilayahLevel): string {
-  if (level === 1) return "kode NOT LIKE '%.%'";
-  if (level === 2) return "kode LIKE '%.%' AND kode NOT LIKE '%.%.%'";
-  if (level === 3) return "kode LIKE '%.%.%' AND kode NOT LIKE '%.%.%.%'";
-  return "kode LIKE '%.%.%.%'";
+  if (level === 1) return "w.kode NOT LIKE '%.%'";
+  if (level === 2) return "w.kode LIKE '%.%' AND w.kode NOT LIKE '%.%.%'";
+  if (level === 3) return "w.kode LIKE '%.%.%' AND w.kode NOT LIKE '%.%.%.%'";
+  return "w.kode LIKE '%.%.%.%'";
 }
 
 function ancestorKodes(kode: string): string[] {
@@ -54,7 +55,7 @@ export async function searchWilayah(
 ): Promise<WilayahSearchResult[]> {
   const where = levelWhereClause(level);
   const [rows] = await pool.query(
-    `SELECT kode, nama FROM wilayah WHERE ${where} AND nama LIKE CONCAT('%', ?, '%') ORDER BY CHAR_LENGTH(nama), nama LIMIT ?`,
+    `SELECT w.kode, w.nama, k.kodepos FROM wilayah w LEFT JOIN wilayah_kodepos k ON w.kode = k.kode WHERE ${where} AND w.nama LIKE CONCAT('%', ?, '%') ORDER BY CHAR_LENGTH(w.nama), w.nama LIMIT ?`,
     [q, limit]
   );
   const items = rows as WilayahItem[];

@@ -122,6 +122,7 @@ level. `level` wajib (1-4), `q` wajib (non-empty), `limit` opsional
 [{
   "kode": "32.03.05.2001",
   "nama": "Sukamaju",
+  "kodepos": "43284",
   "path": [
     { "kode": "32", "nama": "Jawa Barat" },
     { "kode": "32.03", "nama": "Kabupaten Cianjur" },
@@ -129,6 +130,7 @@ level. `level` wajib (1-4), `q` wajib (non-empty), `limit` opsional
   ]
 }]
 ```
+*Catatan: Field `kodepos` (5 digit) otomatis terisi untuk data tingkat Desa/Kelurahan.*
 
 **Error `400`:** `level` di luar 1-4, atau `q` kosong.
 
