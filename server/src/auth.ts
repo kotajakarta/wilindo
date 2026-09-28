@@ -6,7 +6,8 @@ if (!process.env.API_KEY) {
   throw new Error('API_KEY is not set (expected in root .env)');
 }
 
-function isValidApiKey(key: string): boolean {
+export function isValidApiKey(key: string): boolean {
+  if (!process.env.API_KEY || !key) return false;
   const expected = Buffer.from(process.env.API_KEY as string);
   const actual = Buffer.from(key);
   if (actual.length !== expected.length) return false;

@@ -1,12 +1,14 @@
 import express from 'express';
-import cors from 'cors';
 import path from 'node:path';
 import { wilayahRouter } from './wilayah.routes';
+import { domainSecurityGuard } from './domain-guard.middleware';
 
 export const app = express();
 
-app.use(cors());
 app.use(express.json());
+
+// Guard domain dan CORS untuk seluruh API
+app.use('/api', domainSecurityGuard);
 
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true });

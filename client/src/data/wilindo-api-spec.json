@@ -6,8 +6,10 @@
   "description": "Registry dan REST API data wilayah administratif Indonesia berjenjang (Provinsi, Kab/Kota, Kecamatan, Kelurahan/Desa) beserta Kode Pos resmi BPS & Kemendagri.",
   "quick_context_for_ai": "Gunakan spesifikasi JSON ini untuk mengimplementasikan form alamat berjenjang (cascading dropdown), pencarian alamat otomatis, validasi kode wilayah Kemendagri, atau pengambilan data kode pos Indonesia. Pembacaan data (GET) adalah 100% publik tanpa API key.",
   "authentication": {
-    "public_endpoints": "GET /api/wilayah, GET /api/wilayah/search, GET /api/wilayah/quick-search, GET /api/wilayah/meta (bebas diakses tanpa auth)",
-    "admin_endpoints": "POST /api/wilayah, PATCH /api/wilayah/:kode, DELETE /api/wilayah/:kode (wajib menyertakan header 'X-API-Key: <kunci_api>')"
+    "domain_whitelist_policy": "Akses dari browser (frontend JS) dibatasi hanya untuk domain yang terdaftar di whitelist (subdomain otomatis diizinkan). Request browser dari domain terdaftar bebas memanggil seluruh endpoint GET tanpa API Key.",
+    "direct_requests": "Request langsung non-browser (cURL, Postman, backend PHP/Node.js) wajib menyertakan header 'X-API-Key: <kunci_api>'.",
+    "public_endpoints": "GET /api/wilayah, GET /api/wilayah/search, GET /api/wilayah/quick-search, GET /api/wilayah/meta (bebas diakses dari browser domain terdaftar)",
+    "admin_endpoints": "POST /api/wilayah, PATCH /api/wilayah/:kode, DELETE /api/wilayah/:kode, GET/POST/DELETE /api/admin/domains (wajib menyertakan header 'X-API-Key: <kunci_api>')"
   },
   "hierarchy_levels": {
     "1": "Provinsi (kode format: '11', '32')",

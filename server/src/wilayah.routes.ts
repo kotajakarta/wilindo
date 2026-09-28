@@ -14,6 +14,11 @@ import {
   type WilayahLevel,
   type WilayahMutationError,
 } from './wilayah.service';
+import {
+  getAllowedDomains,
+  addAllowedDomain,
+  deleteAllowedDomain,
+} from './allowed-domain.service';
 
 export const wilayahRouter = Router();
 
@@ -255,4 +260,42 @@ wilayahRouter.get('/admin/bps-sync/progress', (req, res) => {
     clearInterval(keepAliveTimer);
     unsubscribe();
   });
+});
+
+// ==================== ALLOWED DOMAINS ADMIN ROUTES ====================
+wilayahRouter.get('/admin/domains', requireApiKey, async (_req, res, next) => {
+  try {
+    const domains = await getAllowedDomains();
+    res.json(domains);
+  } catch (err) {
+    next(err);
+  }
+});
+
+wilayahRouter.post('/admin/domains', requireApiKey, async (req, res) => {
+  try {
+    const { domain, keterangan } = req.body || {};
+    const created = await addAllowedDomain(domain, keterangan);
+    res.status(201).json({ ok: true, data: created });
+  } catch (err: any) {
+    res.status(400).json({ error: err.message || 'Gagal menambahkan domain' });
+  }
+});
+
+wilayahRouter.delete('/admin/domains/:id', requireApiKey, async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    if (isNaN(id) || id <= 0) {
+      res.status(400).json({ error: 'ID domain tidak valid' });
+      return;
+    }
+    const success = await deleteAllowedDomain(id);
+    if (!success) {
+      res.status(404).json({ error: 'Domain tidak ditemukan' });
+      return;
+    }
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
 });

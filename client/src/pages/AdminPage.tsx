@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { WilayahAdminManager } from '../components/WilayahAdminManager';
 import { BpsSyncSection } from '../components/BpsSyncSection';
+import { AllowedDomainsSection } from '../components/AllowedDomainsSection';
 import { verifyAdminApiKey } from '../api/wilayahAdmin';
 
 const API_KEY_STORAGE_KEY = 'wilindo_admin_api_key';
@@ -174,6 +175,9 @@ export function AdminPage() {
             apiKey={apiKey}
             onSyncCompleted={() => setSyncRefreshToken((t) => t + 1)}
           />
+
+          {/* Bagian Whitelist Domain API */}
+          <AllowedDomainsSection apiKey={apiKey} />
 
           {/* Bagian Penelusuran & Manajemen Data Wilayah */}
           <div className="rounded-xl border border-hairline bg-surface p-6 shadow-sm">

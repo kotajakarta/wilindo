@@ -35,22 +35,24 @@ relevan kalau aplikasi lain juga perlu mengelola (tambah/ubah/hapus) data
 wilayah, bukan sekadar menampilkan dropdown — untuk kasus ini, **minta
 `API_KEY` production ke pemilik project**, jangan diminta/ditebak sendiri.
 
-## Autentikasi
+## Batasan Domain & Autentikasi
 
-Endpoint yang mengubah data (`POST`, `PATCH`, `DELETE`) wajib mengirim
-header:
+API Wilindo menerapkan pembatasan akses berbasis domain (Whitelist Domain & Subdomain) dengan kebijakan berikut:
 
-```
-X-API-Key: <API_KEY production — minta ke pemilik project>
-```
+1. **Akses dari Browser (Frontend Web):**
+   - Aplikasi frontend Anda wajib berjalan pada domain yang telah didaftarkan ke whitelist oleh Admin Wilindo.
+   - **Subdomain Otomatis Diizinkan:** Jika domain `domainanda.com` didaftarkan, maka seluruh subdomain (`app.domainanda.com`, `admin.domainanda.com`, dll) otomatis dapat mengakses API tanpa perlu didaftarkan satu per satu.
+   - Panggilan dari browser pada domain terdaftar **tidak memerlukan API Key** untuk seluruh endpoint pembacaan data (`GET`).
 
-Tanpa header ini atau dengan nilai yang salah, server membalas
-`401 { "error": "API key tidak valid" }`. Endpoint `GET` tidak butuh key.
+2. **Akses Langsung Non-Browser (cURL, Postman, Script Backend PHP/Node.js):**
+   - Request langsung tanpa browser origin **wajib menyertakan header `X-API-Key`**:
+     ```http
+     X-API-Key: <kunci_api_anda>
+     ```
+   - Tanpa header ini, server membalas `401 { "error": "Akses ditolak: request langsung tanpa browser origin wajib menyertakan X-API-Key yang valid di header" }`.
 
-**Jangan pernah** menaruh API key ini di kode frontend/browser yang bisa
-dilihat publik — panggil endpoint mutasi dari backend aplikasi Anda, key
-disimpan sebagai environment variable di server, bukan hardcode di
-repository.
+3. **Endpoint Mutasi Data (`POST`, `PATCH`, `DELETE`):**
+   - Tetap selalu wajib menyertakan header `X-API-Key`. **Jangan pernah** menaruh API key ini di kode frontend/browser publik.
 
 ## Format Kode Wilayah
 
