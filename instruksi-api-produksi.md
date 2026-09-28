@@ -133,7 +133,28 @@ level. `level` wajib (1-4), `q` wajib (non-empty), `limit` opsional
 
 **Error `400`:** `level` di luar 1-4, atau `q` kosong.
 
-### 3. `POST /api/wilayah` (butuh `X-API-Key`)
+### 3. `GET /api/wilayah/quick-search?q=<teks/kodepos>&limit=<n>`
+
+Pencarian cepat gabungan untuk nama Kecamatan, Desa/Kelurahan, ataupun pencarian langsung berdasarkan **5 digit angka kode pos**. Mengembalikan level (3 atau 4), breadcrumb `path` lengkap, dan `kodepos`. `limit` opsional (default 15, maksimum 30).
+
+**Contoh:** `GET https://wil.nri.my.id/api/wilayah/quick-search?q=sukamaju` atau `GET https://wil.nri.my.id/api/wilayah/quick-search?q=43284`
+
+**Response `200`:**
+```json
+[{
+  "kode": "32.03.05.2001",
+  "nama": "Sukamaju",
+  "level": 4,
+  "kodepos": "43284",
+  "path": [
+    { "kode": "32", "nama": "Jawa Barat" },
+    { "kode": "32.03", "nama": "Kabupaten Cianjur" },
+    { "kode": "32.03.05", "nama": "Kecamatan Cianjur" }
+  ]
+}]
+```
+
+### 4. `POST /api/wilayah` (butuh `X-API-Key`)
 
 Buat wilayah baru.
 

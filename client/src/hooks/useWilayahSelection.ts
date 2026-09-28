@@ -64,6 +64,30 @@ export function useWilayahSelection(onChange?: (selection: WilayahSelection) => 
     });
   }
 
+  function selectFullLocation(item: WilayahItem, path: WilayahItem[], level: 3 | 4) {
+    if (level === 4) {
+      const [provinsi, kabupaten, kecamatan] = path;
+      update({
+        provinsi: provinsi ?? null,
+        kabupaten: kabupaten ?? null,
+        kecamatan: kecamatan ?? null,
+        desa: item,
+      });
+    } else if (level === 3) {
+      const [provinsi, kabupaten] = path;
+      update({
+        provinsi: provinsi ?? null,
+        kabupaten: kabupaten ?? null,
+        kecamatan: item,
+        desa: null,
+      });
+    }
+  }
+
+  function resetAll() {
+    update(EMPTY_SELECTION);
+  }
+
   return {
     selection,
     setProvinsi,
@@ -73,5 +97,7 @@ export function useWilayahSelection(onChange?: (selection: WilayahSelection) => 
     autoFillFromKabupaten,
     autoFillFromKecamatan,
     autoFillFromDesa,
+    selectFullLocation,
+    resetAll,
   };
 }

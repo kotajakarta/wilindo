@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import {
   getChildren,
   searchWilayah,
+  quickSearchWilayah,
   createWilayah,
   updateWilayahNama,
   deleteWilayah,
@@ -61,6 +62,53 @@ describe('searchWilayah', () => {
         ],
       },
     ]);
+  });
+});
+
+describe('quickSearchWilayah', () => {
+  it('returns matched kecamatan and desa with full path and level', async () => {
+    const pool = mockPool([
+      [[{ kode: '32.03.05.2001', nama: 'Sukamaju', kodepos: '43284' }], []],
+      [
+        [
+          { kode: '32', nama: 'Jawa Barat' },
+          { kode: '32.03', nama: 'Kabupaten Cianjur' },
+          { kode: '32.03.05', nama: 'Kecamatan Cianjur' },
+        ],
+        [],
+      ],
+    ]);
+    const result = await quickSearchWilayah(pool, 'sukamaju');
+    expect(result).toEqual([
+      {
+        kode: '32.03.05.2001',
+        nama: 'Sukamaju',
+        level: 4,
+        kodepos: '43284',
+        path: [
+          { kode: '32', nama: 'Jawa Barat' },
+          { kode: '32.03', nama: 'Kabupaten Cianjur' },
+          { kode: '32.03.05', nama: 'Kecamatan Cianjur' },
+        ],
+      },
+    ]);
+  });
+
+  it('searches by postal code when query is numeric', async () => {
+    const pool = mockPool([
+      [[{ kode: '32.03.05.2001', nama: 'Sukamaju', kodepos: '43284' }], []],
+      [
+        [
+          { kode: '32', nama: 'Jawa Barat' },
+          { kode: '32.03', nama: 'Kabupaten Cianjur' },
+          { kode: '32.03.05', nama: 'Kecamatan Cianjur' },
+        ],
+        [],
+      ],
+    ]);
+    const result = await quickSearchWilayah(pool, '43284');
+    expect(result).toHaveLength(1);
+    expect(result[0].kodepos).toBe('43284');
   });
 });
 

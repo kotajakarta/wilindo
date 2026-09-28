@@ -7,6 +7,7 @@ import { bpsSyncManager } from './bps-sync.service';
 import {
   getChildren,
   searchWilayah,
+  quickSearchWilayah,
   createWilayah,
   updateWilayahNama,
   deleteWilayah,
@@ -116,6 +117,23 @@ wilayahRouter.get('/wilayah/search', async (req, res, next) => {
     const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? Math.min(limitRaw, 50) : 20;
 
     const result = await searchWilayah(pool, levelRaw as WilayahLevel, q, limit);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+wilayahRouter.get('/wilayah/quick-search', async (req, res, next) => {
+  try {
+    const q = typeof req.query.q === 'string' ? req.query.q.trim() : '';
+    if (!q) {
+      res.status(400).json({ error: 'q wajib diisi' });
+      return;
+    }
+    const limitRaw = Number(req.query.limit);
+    const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? Math.min(limitRaw, 30) : 15;
+
+    const result = await quickSearchWilayah(pool, q, limit);
     res.json(result);
   } catch (err) {
     next(err);

@@ -1,4 +1,4 @@
-import type { WilayahItem, WilayahSearchResult, WilayahLevel } from '../types/wilayah';
+import type { WilayahItem, WilayahSearchResult, WilayahLevel, QuickSearchResult } from '../types/wilayah';
 
 export async function getChildren(parentKode?: string): Promise<WilayahItem[]> {
   const url = parentKode
@@ -16,6 +16,16 @@ export async function searchWilayah(
 ): Promise<WilayahSearchResult[]> {
   const params = new URLSearchParams({ level: String(level), q, limit: String(limit) });
   const res = await fetch(`/api/wilayah/search?${params.toString()}`);
+  if (!res.ok) throw new Error('Gagal mencari wilayah');
+  return res.json();
+}
+
+export async function quickSearchWilayah(
+  q: string,
+  limit = 15
+): Promise<QuickSearchResult[]> {
+  const params = new URLSearchParams({ q, limit: String(limit) });
+  const res = await fetch(`/api/wilayah/quick-search?${params.toString()}`);
   if (!res.ok) throw new Error('Gagal mencari wilayah');
   return res.json();
 }

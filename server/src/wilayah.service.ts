@@ -86,6 +86,78 @@ export async function searchWilayah(
   }));
 }
 
+export interface QuickSearchResult extends WilayahItem {
+  level: 3 | 4;
+  path: WilayahItem[];
+}
+
+export async function quickSearchWilayah(
+  pool: QueryablePool,
+  q: string,
+  limit = 15
+): Promise<QuickSearchResult[]> {
+  const isNumeric = /^\d+$/.test(q);
+  let rows: unknown[];
+
+  if (isNumeric) {
+    const [result] = await pool.query(
+      `SELECT w.kode, w.nama, k.kodepos
+       FROM wilayah w
+       LEFT JOIN wilayah_kodepos k ON w.kode = k.kode
+       WHERE (w.kode LIKE '%.%.%' OR w.kode LIKE '%.%.%.%')
+         AND (k.kodepos LIKE CONCAT(?, '%') OR w.nama LIKE CONCAT('%', ?, '%'))
+       ORDER BY (k.kodepos = ?) DESC, CHAR_LENGTH(w.nama), w.nama
+       LIMIT ?`,
+      [q, q, q, limit]
+    );
+    rows = result as unknown[];
+  } else {
+    const [result] = await pool.query(
+      `SELECT w.kode, w.nama, k.kodepos
+       FROM wilayah w
+       LEFT JOIN wilayah_kodepos k ON w.kode = k.kode
+       WHERE w.kode LIKE '%.%.%'
+         AND w.nama LIKE CONCAT('%', ?, '%')
+       ORDER BY (w.nama LIKE CONCAT(?, '%')) DESC, CHAR_LENGTH(w.nama), w.nama
+       LIMIT ?`,
+      [q, q, limit]
+    );
+    rows = result as unknown[];
+  }
+
+  const items = rows as WilayahItem[];
+  if (items.length === 0) return [];
+
+  const ancestorSet = new Set<string>();
+  for (const item of items) {
+    for (const anc of ancestorKodes(item.kode)) ancestorSet.add(anc);
+  }
+  const ancestorKodeList = Array.from(ancestorSet);
+
+  const ancestorMap = new Map<string, string>();
+  if (ancestorKodeList.length > 0) {
+    const [ancestorRows] = await pool.query(
+      `SELECT kode, nama FROM wilayah WHERE kode IN (${ancestorKodeList.map(() => '?').join(',')})`,
+      ancestorKodeList
+    );
+    for (const row of ancestorRows as WilayahItem[]) {
+      ancestorMap.set(row.kode, row.nama);
+    }
+  }
+
+  return items.map((item) => {
+    const dotCount = (item.kode.match(/\./g) ?? []).length;
+    const level = (dotCount + 1) as 3 | 4;
+    return {
+      ...item,
+      level,
+      path: ancestorKodes(item.kode)
+        .map((kode) => ({ kode, nama: ancestorMap.get(kode) ?? '' }))
+        .filter((a) => a.nama !== ''),
+    };
+  });
+}
+
 const LEVEL_PATTERNS: Record<WilayahLevel, RegExp> = {
   1: /^\d{2}$/,
   2: /^\d{2}\.\d{2}$/,
